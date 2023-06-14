@@ -1,15 +1,19 @@
 import express from 'express'
 import 'dotenv/config'
 
+import auth from './routes/auth.js'
+
 const app = express();
-const PORT = 5000;
 
+// carpeta publica
+app.use(express.static('public'));
 
-app.get('/',(req,res)=>{
-    res.status(201).json({
-        msg:"Hello word"
-    })
-})
+//lectura del body
+app.use(express.json());
+
+// rutas de login y jwt
+app.use('/api/auth',auth);
+
 
 app.listen(process.env.PORT,(err)=>{
     if(err){
