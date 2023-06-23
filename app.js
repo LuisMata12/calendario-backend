@@ -2,8 +2,12 @@ import express from 'express'
 import 'dotenv/config'
 
 import auth from './routes/auth.js'
+import dbConnection from './database/config.js';
 
 const app = express();
+
+// base de datos
+dbConnection();
 
 // carpeta publica
 app.use(express.static('public'));
