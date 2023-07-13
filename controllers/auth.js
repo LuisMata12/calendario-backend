@@ -1,5 +1,7 @@
 import bcrypt from 'bcryptjs'
 import Usuario from '../models/Usuario.js'
+import generarJWT from '../helpers/jwt.js';
+
 
 
 const crearUsuario =async (req,res)=>{
@@ -24,11 +26,15 @@ const crearUsuario =async (req,res)=>{
         usuario.password=hash;
 
         await usuario.save();
+
+        // Generar JWT
+        const token = await generarJWT(usuario.id,usuario.name)
     
         res.status(201).json({
             ok:true,
             uid:usuario.id,
-            name:usuario.name
+            name:usuario.name,
+            token
         })
 
     } catch (error) {
@@ -39,19 +45,50 @@ const crearUsuario =async (req,res)=>{
     }
 };
 
-const loginUsuario =(req,res)=>{
+const loginUsuario = async (req,res)=>{
 
     const {email,password} = req.body;
 
-    res.status(200).json({
-        ok:true,
-        msg:"login",
-        email,
-        password
-    })
+    try {
+
+        // validar correo
+        const usuario = await Usuario.findOne({email:email});
+        if(!usuario){
+            return res.status(400).json({
+                ok:false,
+                msg:'El usuario no existe'
+            })
+        }
+        // Validar contraseña :)
+        const validarPassword = bcrypt.compareSync(password,usuario.password);
+        if(!validarPassword){
+            return res.status(400).json({
+                ok:false,
+                msg:"Password incorrecto"
+            });
+        }
+
+        // Generar JWT
+        const token = await generarJWT(usuario.id,usuario.name)
+
+        res.status(201).json({
+            ok:true,
+            uid:usuario.id,
+            name:usuario.name,
+            token
+        })
+
+    } catch (error) {
+
+            res.status(500).json ({
+            ok:false,
+            msg:"Hable con el administrador"
+        })
+    }
 };
 
 const revalidarToken =(req,res)=>{
+
     res.status(200).json({
         ok:true,
         msg:"renew"
