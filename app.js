@@ -7,6 +7,9 @@ import dbConnection from './database/config.js';
 
 const app = express();
 
+// Git testing
+console.log('test git')
+
 // base de datos
 dbConnection();
 
